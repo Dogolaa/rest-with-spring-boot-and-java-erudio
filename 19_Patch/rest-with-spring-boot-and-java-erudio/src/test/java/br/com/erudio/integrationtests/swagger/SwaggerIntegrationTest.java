@@ -1,7 +1,7 @@
 package br.com.erudio.integrationtests.swagger;
 
 import br.com.erudio.config.TestConfigs;
-import br.com.erudio.integrationtests.testcontainers.AbstractIntegrationTest;
+import br.com.erudio.integrationtests.testcointainers.AbstractIntegrationTest;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
