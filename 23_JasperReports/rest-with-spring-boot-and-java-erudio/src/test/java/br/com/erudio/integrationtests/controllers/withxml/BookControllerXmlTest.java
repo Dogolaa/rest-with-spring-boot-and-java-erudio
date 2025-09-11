@@ -20,7 +20,8 @@ import java.util.Date;
 
 import static io.restassured.RestAssured.given;
 import static junit.framework.TestCase.assertTrue;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
@@ -45,25 +46,25 @@ class BookControllerXmlTest extends AbstractIntegrationTest {
         mockBook();
 
         specification = new RequestSpecBuilder()
-            .addHeader(TestConfigs.HEADER_PARAM_ORIGIN, TestConfigs.ORIGIN_ERUDIO)
-            .setBasePath("/api/book/v1")
-            .setPort(TestConfigs.SERVER_PORT)
+                .addHeader(TestConfigs.HEADER_PARAM_ORIGIN, TestConfigs.ORIGIN_ERUDIO)
+                .setBasePath("/api/book/v1")
+                .setPort(TestConfigs.SERVER_PORT)
                 .addFilter(new RequestLoggingFilter(LogDetail.ALL))
                 .addFilter(new ResponseLoggingFilter(LogDetail.ALL))
-            .build();
+                .build();
 
         var content = given(specification)
-            .contentType(MediaType.APPLICATION_XML_VALUE)
-            .accept(MediaType.APPLICATION_XML_VALUE)
+                .contentType(MediaType.APPLICATION_XML_VALUE)
+                .accept(MediaType.APPLICATION_XML_VALUE)
                 .body(book)
-            .when()
+                .when()
                 .post()
-            .then()
+                .then()
                 .statusCode(200)
                 .contentType(MediaType.APPLICATION_XML_VALUE)
-            .extract()
+                .extract()
                 .body()
-                    .asString();
+                .asString();
 
         BookDTO createdBook = objectMapper.readValue(content, BookDTO.class);
         book = createdBook;
@@ -74,7 +75,7 @@ class BookControllerXmlTest extends AbstractIntegrationTest {
         assertEquals("Nigel Poulton", book.getAuthor());
         assertEquals(55.99, book.getPrice());
     }
-    
+
     @Test
     @Order(2)
     void updateTest() throws JsonProcessingException {
@@ -82,17 +83,17 @@ class BookControllerXmlTest extends AbstractIntegrationTest {
         book.setTitle("Docker Deep Dive - Updated");
 
         var content = given(specification)
-            .contentType(MediaType.APPLICATION_XML_VALUE)
-            .accept(MediaType.APPLICATION_XML_VALUE)
+                .contentType(MediaType.APPLICATION_XML_VALUE)
+                .accept(MediaType.APPLICATION_XML_VALUE)
                 .body(book)
-            .when()
+                .when()
                 .put()
-            .then()
+                .then()
                 .statusCode(200)
                 .contentType(MediaType.APPLICATION_XML_VALUE)
-            .extract()
+                .extract()
                 .body()
-                    .asString();
+                .asString();
 
         BookDTO createdBook = objectMapper.readValue(content, BookDTO.class);
         book = createdBook;
@@ -111,15 +112,15 @@ class BookControllerXmlTest extends AbstractIntegrationTest {
         var content = given(specification)
                 .contentType(MediaType.APPLICATION_XML_VALUE)
                 .accept(MediaType.APPLICATION_XML_VALUE)
-                    .pathParam("id", book.getId())
+                .pathParam("id", book.getId())
                 .when()
-                    .get("{id}")
+                .get("{id}")
                 .then()
-                    .statusCode(200)
-                    .contentType(MediaType.APPLICATION_XML_VALUE)
+                .statusCode(200)
+                .contentType(MediaType.APPLICATION_XML_VALUE)
                 .extract()
-                    .body()
-                        .asString();
+                .body()
+                .asString();
 
         BookDTO createdBook = objectMapper.readValue(content, BookDTO.class);
         book = createdBook;
@@ -140,9 +141,9 @@ class BookControllerXmlTest extends AbstractIntegrationTest {
 
         given(specification)
                 .pathParam("id", book.getId())
-            .when()
+                .when()
                 .delete("{id}")
-            .then()
+                .then()
                 .statusCode(204);
     }
 
@@ -153,7 +154,7 @@ class BookControllerXmlTest extends AbstractIntegrationTest {
 
         var content = given(specification)
                 .accept(MediaType.APPLICATION_XML_VALUE)
-                .queryParams("page", 0 , "size", 12, "direction", "asc")
+                .queryParams("page", 9, "size", 12, "direction", "asc")
                 .when()
                 .get()
                 .then()
@@ -173,20 +174,20 @@ class BookControllerXmlTest extends AbstractIntegrationTest {
         assertNotNull(bookOne.getAuthor());
         assertNotNull(bookOne.getPrice());
         assertTrue(bookOne.getId() > 0);
-        assertEquals("Big Data: como extrair volume, variedade, velocidade e valor da avalanche de informação cotidiana", bookOne.getTitle());
-        assertEquals("Viktor Mayer-Schonberger e Kenneth Kukier", bookOne.getAuthor());
-        assertEquals(54.00, bookOne.getPrice());
+        assertEquals("The Art of Agile Development", bookOne.getTitle());
+        assertEquals("James Shore e Shane Warden", bookOne.getAuthor());
+        assertEquals(97.21, bookOne.getPrice());
 
-        BookDTO foundBookFive = books.get(4);
+        BookDTO foundBookFive = books.get(7);
 
         assertNotNull(foundBookFive.getId());
         assertNotNull(foundBookFive.getTitle());
         assertNotNull(foundBookFive.getAuthor());
         assertNotNull(foundBookFive.getPrice());
         assertTrue(foundBookFive.getId() > 0);
-        assertEquals("Domain Driven Design", foundBookFive.getTitle());
-        assertEquals("Eric Evans", foundBookFive.getAuthor());
-        assertEquals(92.00, foundBookFive.getPrice());
+        assertEquals("The Art of Computer Programming, Volume 1: Fundamental Algorithms", foundBookFive.getTitle());
+        assertEquals("Donald E. Knuth", foundBookFive.getAuthor());
+        assertEquals(139.69, foundBookFive.getPrice());
     }
 
     private void mockBook() {

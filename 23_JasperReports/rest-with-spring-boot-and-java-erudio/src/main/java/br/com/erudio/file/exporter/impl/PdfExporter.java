@@ -1,18 +1,15 @@
 package br.com.erudio.file.exporter.impl;
 
 import br.com.erudio.data.dto.PersonDTO;
-import br.com.erudio.file.exporter.contract.FileExporter;
-import com.google.zxing.BarcodeFormat;
-import com.google.zxing.client.j2se.MatrixToImageWriter;
-import com.google.zxing.common.BitMatrix;
-import com.google.zxing.qrcode.QRCodeWriter;
+import br.com.erudio.file.exporter.contract.PersonExporter;
+import br.com.erudio.services.QRCodeService;
 import net.sf.jasperreports.engine.*;
 import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.util.Collections;
@@ -21,10 +18,14 @@ import java.util.List;
 import java.util.Map;
 
 @Component
-public class PdfExporter implements FileExporter {
+public class PdfExporter implements PersonExporter {
+
+
+    @Autowired
+    private QRCodeService service;
 
     @Override
-    public Resource exportFile(List<PersonDTO> people) throws Exception {
+    public Resource exportPeople(List<PersonDTO> people) throws Exception {
         InputStream inputStream = getClass().getResourceAsStream("/templates/people.jrxml");
         if (inputStream == null) {
             throw new RuntimeException("Template file not found: /templates/people.jrxml");
@@ -57,14 +58,17 @@ public class PdfExporter implements FileExporter {
         JasperReport mainReport = JasperCompileManager.compileReport(mainTemplateStream);
         JasperReport subReport = JasperCompileManager.compileReport(subReportStream);
 
-        InputStream qrCodeStream = generateQRCode(person.getProfileUrl(), 200, 200);
+        InputStream qrCodeStream = service.generateQRCode(person.getProfileUrl(), 200, 200);
 
 
-        JRBeanCollectionDataSource subDataSource = new JRBeanCollectionDataSource(Collections.singletonList(person.getBooks()));
+        JRBeanCollectionDataSource subReportDataSource = new JRBeanCollectionDataSource(person.getBooks());
+
+        String path = getClass().getResource("/templates/books.jasper").getPath();
 
         Map<String, Object> parameters = new HashMap<>();
-        parameters.put("SUB_REPORT_DATA_SOURCE", subDataSource);
+        parameters.put("SUB_REPORT_DATA_SOURCE", subReportDataSource);
         parameters.put("BOOK_SUB_REPORT", subReport);
+        parameters.put("SUB_REPORT_DIR", path);
         parameters.put("QR_CODEIMAGE", qrCodeStream);
 
         JRBeanCollectionDataSource mainDataSource = new JRBeanCollectionDataSource(Collections.singletonList(person));
@@ -77,13 +81,4 @@ public class PdfExporter implements FileExporter {
         }
     }
 
-    private InputStream generateQRCode(String url, int widht, int height) throws Exception {
-        QRCodeWriter qrCodeWriter = new QRCodeWriter();
-        BitMatrix bitMatrix = qrCodeWriter.encode(url, BarcodeFormat.QR_CODE, widht, height);
-
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        MatrixToImageWriter.writeToStream(bitMatrix, "PNG", outputStream);
-
-        return new ByteArrayInputStream(outputStream.toByteArray());
-    }
 }

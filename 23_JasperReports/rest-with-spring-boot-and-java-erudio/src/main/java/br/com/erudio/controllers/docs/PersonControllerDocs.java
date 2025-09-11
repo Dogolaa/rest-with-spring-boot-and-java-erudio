@@ -108,6 +108,21 @@ public interface PersonControllerDocs {
             @RequestParam(value = "direction", defaultValue = "asc") String direction
     );
 
+    @Operation(summary = "Export Person data as PDF", description = "Export a specific Person data  as PDF format by your Id",
+            tags = {"People"}, responses = {
+            @ApiResponse(
+                    description = "Success",
+                    responseCode = "200",
+                    content = @Content(mediaType = MediaTypes.APPLICATION_PDF_VALUE)),
+            @ApiResponse(description = "No Content", responseCode = "204", content = @Content),
+            @ApiResponse(description = "Bad Request", responseCode = "400", content = @Content),
+            @ApiResponse(description = "Unauthorized", responseCode = "401", content = @Content),
+            @ApiResponse(description = "Not Found", responseCode = "404", content = @Content),
+            @ApiResponse(description = "Internal Sever Error", responseCode = "500", content = @Content)
+    })
+    ResponseEntity<Resource> export(@PathVariable("id") Long id, HttpServletRequest request);
+
+
     @Operation(summary = "Find a Person", description = "Find a specific Person by your id",
             tags = {"People"}, responses = {
             @ApiResponse(description = "Success", responseCode = "200", content = @Content(schema = @Schema(implementation = PersonDTO.class))),
