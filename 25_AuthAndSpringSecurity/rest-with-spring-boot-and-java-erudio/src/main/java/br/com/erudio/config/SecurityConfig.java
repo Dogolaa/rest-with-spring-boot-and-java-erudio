@@ -32,9 +32,9 @@ public class SecurityConfig {
         this.tokenProvider = tokenProvider;
     }
 
-
     @Bean
     PasswordEncoder passwordEncoder() {
+
         PasswordEncoder pbkdf2Encoder = new Pbkdf2PasswordEncoder(
                 "", 8, 185000,
                 Pbkdf2PasswordEncoder.SecretKeyFactoryAlgorithm.PBKDF2WithHmacSHA256);
@@ -52,9 +52,10 @@ public class SecurityConfig {
         return configuration.getAuthenticationManager();
     }
 
+    @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         JwtTokenFilter filter = new JwtTokenFilter(tokenProvider);
-
+        //@formatter:off
         return http
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .csrf(AbstractHttpConfigurer::disable)
@@ -65,19 +66,17 @@ public class SecurityConfig {
                 .authorizeHttpRequests(
                         authorizeHttpRequests -> authorizeHttpRequests
                                 .requestMatchers(
-                                        "/auth/signing",
+                                        "/auth/signin",
                                         "/auth/refresh/**",
+                                        "/auth/createUser",
                                         "/swagger-ui/**",
-                                        "/v3/api-docs/**",
-                                        //Remover em Prod
-                                        "/auth/createUser"
+                                        "/v3/api-docs/**"
                                 ).permitAll()
                                 .requestMatchers("/api/**").authenticated()
                                 .requestMatchers("/users").denyAll()
                 )
-                .cors(cors -> {
-                })
+                .cors(cors -> {})
                 .build();
+        //@formatter:on
     }
-
 }
